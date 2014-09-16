@@ -1,6 +1,6 @@
 ## YangcongHelper
 
-a Helper for YangCong Onion Math .
+a Helper for YangCong.
 
 ### Installation
 
