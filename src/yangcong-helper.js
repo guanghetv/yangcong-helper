@@ -11,7 +11,9 @@
    */
   var YangCongHelper = function(){
     this.init();
+    this.buildNotify();
     this.mode = 'manual';
+
   };
   /**
    * [init get all element]
@@ -22,6 +24,7 @@
     this.btnNext = $('div.btn.btn-success.btn-embossed.ng-binding').not('.ng-hide');
     this.options = $('.option-container .option').not('.ng-hide');
     this.input = $('#formula-input:visible');
+
   };
   /**
    * [getStatus get current page status]
@@ -41,10 +44,10 @@
    * @return {[type]} [description]
    */
   YangCongHelper.prototype.makeChoice = function(){
-    this.options.each(function(i, el){ 
+    this.options.each(function(i, el){
       var $el = $(el);
-      var $scope = $el.scope(); 
-      var choice = $scope.choice; 
+      var $scope = $el.scope();
+      var choice = $scope.choice;
       if(choice.is_correct)el.click();
     });
   };
@@ -70,10 +73,10 @@
    * @return {[type]} [description]
    */
   YangCongHelper.prototype.makeAnswer = function(){
-      switch(this.getStatus()){
+    switch(this.getStatus()){
       case 'ERROR':
         if(this.mode == 'manual')
-          alert('只有在做题时才有用哦 快去做题吧 ! 少年 .');
+          this.notify('只有在做题时才有用哦 快去做题吧 ! 少年 .');
         break;
       case 'WAITING_CHOICE':
         this.makeChoice();
@@ -88,7 +91,7 @@
         this.btnNext.click();
         break;
       default:
-        alert('一定是你打开的方式有问题 :P , 快来给我反馈下原因 .');
+        this.notify('一定是你打开的方式有问题 :P , 快来给我反馈下原因 .');
         window.open('https://gist.github.com/song940/40c90eb8f25368b0895a');
         break;
     }
@@ -100,18 +103,54 @@
   YangCongHelper.prototype.setMode = function(mode){
     if(mode) this.mode = 'auto';
     if(mode == 'manual') this.mode = 'manual';
-
     var that = this;
     switch(this.mode){
       case 'auto':
+        this.notify('洋葱数学小助手: 已切换到自动模式');
         this.interval = setInterval(function(){
           that.makeAnswer();
-        }, 2000);
+        }, this.interval_time || 2000);
         break;
       case 'manual':
+        this.notify('洋葱数学小助手: 已切换到手动模式');
         if(this.interval) clearInterval(this.interval);
         break;
     }
+  };
+  /**
+  *
+  */
+  YangCongHelper.prototype.notify = function(msg){
+    var that = this;
+    var li = document.createElement('div');
+    with(li.style){
+      right = 0;
+      color = 'white';
+      margin = '10px';
+      padding = '10px';
+      background = '#444';
+      borderRadius = '5px';
+      transition = 'all .3s';
+    }
+    li.innerText = msg;
+    that.notifyEl.appendChild(li);
+    setTimeout(function(){
+      li.style.opacity = 0;
+      setTimeout(function(){
+        that.notifyEl.removeChild(li);
+      }, 300);
+    }, 5000);
+  };
+
+  YangCongHelper.prototype.buildNotify = function(){
+    this.notifyEl = document.createElement('div');
+    with(this.notifyEl.style){
+      top = '70px';
+      zIndex = 1000;
+      right = '10px';
+      position = 'fixed';
+    }
+    document.body.appendChild(this.notifyEl);
   };
 
   /**
@@ -120,21 +159,24 @@
    */
   YangCongHelper.init = function(){
     window.helper = new YangCongHelper();
-    alert("欢迎使用洋葱数学小助手");
+    window.helper.notify("欢迎使用洋葱数学小助手");
+    window.helper.notify("洋葱数学小助手: 按键盘上的 'K' 可以手动答题 ~");
+    window.helper.notify("洋葱数学小助手: 按键盘上的 [Ctrl + K] 可以切换 [自动模式] 和 [手动模式] 哦 ~");
+    //make
     window.helper.makeAnswer();
-    alert("洋葱数学小助手: 按键盘上的 'A' 可以切换 [自动模式] 和 [手动模式] 哦 ~");
     $(document).on('keydown', function(ev){
-      if(ev.keyCode == 65){ // 'A'
+      ev.preventDefault();
+      if(ev.ctrlKey && ev.keyCode == 75){ // 'K'
         switch(window.helper.mode){
           case 'auto':
             window.helper.setMode('manual');
-            alert('洋葱数学小助手: 已切换到手动模式');
             break;
           case 'manual':
             window.helper.setMode('auto');
-            alert('洋葱数学小助手: 已切换到自动模式');
             break;
         }
+      }else if(ev.keyCode == 75){
+        window.helper.makeAnswer();
       }
     });
   };
@@ -144,7 +186,7 @@
    * @return {[type]} [description]
    */
   YangCongHelper.run = function(){
-    if(!window.helper)return;
+    if(!window.helper) return;
     switch(window.helper.mode){
       case 'auto':
         window.helper.setMode('manual');

@@ -1,9 +1,9 @@
 ;(function(win){
-	if(!/洋葱数学$/.test(document.title)){ 
+	if(!/洋葱数学$/.test(document.title)){
 	  window.location.href = 'http://yangcong345.com';
 	  return;
 	}
-	if(!!win.YangCongHelper){
+	if('YangCongHelper' in win){
 		win.YangCongHelper.run();
 	}else{
 		$.ajax({
